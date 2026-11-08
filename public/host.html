@@ -171,6 +171,7 @@ function buildStage() {
     let body = '';
     if (q.type === 'choice') body = `<div class="opts${q.options.length > 8 ? ' many' : ''}">${q.options.map((o, i) => `<span style="background:${COLORS[i % COLORS.length]}">${esc(o)}</span>`).join('')}</div>`;
     else if (q.type === 'person') body = `<div class="hint">👆 휴대폰에서 동기 이름을 골라 주세요</div>`;
+    else if (q.type === 'pair') body = `<div class="hint">💑 휴대폰에서 남자 한 명, 여자 한 명을 골라 주세요</div>`;
     else if (q.type === 'number') body = `<div class="hint">🔢 숫자로 답해 주세요</div>`;
     else if (q.type === 'short') body = `<div class="hint">✍️ 짧게 적어 주세요 (같은 답끼리 모아서 보여드려요)</div>`;
     else body = `<div class="hint">💌 익명으로 메시지를 남겨 주세요</div>`;
@@ -222,11 +223,11 @@ function openDrawer() {
   d.innerHTML = `<button class="close-x" onclick="closeDrawer()">✕</button>
     <h2 style="margin-top:0">질문 목록</h2><ul class="qlist" id="qlist"></ul>
     <h2>동기 명단 (${S.rosterCount}명)</h2>
-    <div class="help">한 줄에 한 명씩, 또는 쉼표로 구분해서 적어 주세요. ‘동기’ 질문에서 이 명단이 보기로 나와요. 비워 두면 ‘동기’ 질문은 이름을 직접 적는 주관식이 돼요.</div>
+    <div class="help">한 줄에 한 명씩, 또는 쉼표로 구분해서 적어 주세요. ‘동기’ 질문에서 이 명단이 보기로 나와요. 비워 두면 ‘동기’ 질문은 이름을 직접 적는 주관식이 돼요. <code>[남]</code>, <code>[여]</code> 줄 아래에 나눠 적으면 ‘커플’ 질문에서 양쪽으로 나뉘어 나와요.</div>
     <textarea id="rosterIn" rows="8">${esc(S.rosterText)}</textarea>
     <h2>질문 편집</h2>
     <div class="help">한 줄에 질문 하나: <b>종류 | 질문 | 보기1, 보기2, …</b><br>
-      종류: <b>객관식</b>(보기 개수 제한 없음) · <b>동기</b>(명단에서 고르기) · <b>숫자</b> · <b>단답</b>(짧은 주관식, 같은 답끼리 집계 + 워드클라우드) · <b>메시지</b>(긴 글, 익명 메모지로 공개)<br>
+      종류: <b>객관식</b>(보기 개수 제한 없음) · <b>동기</b>(명단에서 고르기) · <b>커플</b>(남 1명 + 여 1명) · <b>숫자</b> · <b>단답</b>(짧은 주관식, 같은 답끼리 집계 + 워드클라우드) · <b>메시지</b>(긴 글, 익명 메모지로 공개)<br>
       예) <code>객관식 | 실습조 선호도 | 가나다, 칼리지, 랜덤, 학번</code><br>맨 끝에 <code>| 5분</code>처럼 붙이면 그 질문만 제한시간이 따로 적용돼요. #으로 시작하는 줄은 무시돼요.</div>
     <textarea id="qIn" rows="14">${esc(S.questionsText)}</textarea>
     <h2>진행 설정</h2>

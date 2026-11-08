@@ -26,6 +26,13 @@
   .search { position: sticky; top: 0; padding: 8px 0; background: transparent; z-index: 2; }
   .names { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .names button { background: #fff; color: #0b3d2e; font-weight: 800; padding: 14px 4px; border-radius: 12px; font-size: 1.05em; box-shadow: 0 3px 0 rgba(0,0,0,.2); }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-bottom: 90px; }
+  .pcol { display: flex; flex-direction: column; gap: 6px; }
+  .phead { text-align: center; font-weight: 900; padding: 6px; background: rgba(0,0,0,.25); border-radius: 10px; }
+  .pcol button { background: #fff; color: #0b3d2e; font-weight: 800; padding: 11px 4px; border-radius: 10px; }
+  .pcol button.mine { background: #e63946; color: #fff; }
+  .pairbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: rgba(11,61,46,.95); }
+  .pairbar #pv { font-weight: 900; font-size: 1.1em; }
   .names.many { grid-template-columns: repeat(2, 1fr); }
   .names.many button { font-size: .95em; padding: 12px 6px; word-break: keep-all; }
   .names button.mine { background: #e63946; color: #fff; }
@@ -154,6 +161,21 @@ function buildAsk(el, q) {
       const s = e.target.value.replace(/\s/g, '');
       btns.forEach(b => (b.style.display = !s || b.dataset.v.replace(/\s/g, '').includes(s) ? '' : 'none'));
     };
+  } else if (q.type === 'pair') {
+    let sel = { m: null, f: null };
+    if (prev) { const [a, b] = String(prev).split(' ♥ '); sel = { m: a, f: b }; }
+    const col = (side, list, label) => `<div class="pcol"><div class="phead">${label}</div>${list.map(n =>
+      `<button data-side="${side}" data-v="${esc(n)}" class="${sel[side] === n ? 'mine' : ''}">${esc(n)}</button>`).join('')}</div>`;
+    el.innerHTML = `<div class="pair">${col('m', q.left, '👨 남자')}${col('f', q.right, '👩 여자')}</div>
+      <div class="pairbar"><div id="pv"></div><button class="btn primary" id="sb">제출하기</button></div>`;
+    const upd = () => {
+      el.querySelectorAll('.pcol button').forEach(b => b.classList.toggle('mine', sel[b.dataset.side] === b.dataset.v));
+      document.getElementById('pv').textContent = `${sel.m || '?'} ♥ ${sel.f || '?'}`;
+      document.getElementById('sb').disabled = !(sel.m && sel.f);
+    };
+    el.querySelectorAll('.pcol button').forEach(b => (b.onclick = () => { sel[b.dataset.side] = b.dataset.v; upd(); }));
+    document.getElementById('sb').onclick = () => answer(sel);
+    upd();
   } else if (q.type === 'number') {
     el.innerHTML = `<div class="panel"><div class="num"><button id="mn">−</button>
       <input class="field" id="nv" type="number" inputmode="numeric" min="0" max="999" value="${prev ?? 0}"><button id="pl">+</button></div>

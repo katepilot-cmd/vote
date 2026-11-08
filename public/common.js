@@ -1,6 +1,6 @@
 // 진행자 화면과 휴대폰 화면이 함께 쓰는 코드
 const COLORS = ['#ff5a5f', '#52b788', '#ffd166', '#f8f9fa', '#ff8fa3', '#95d5b2', '#f4a261', '#a7c957', '#ffb4a2', '#80ed99'];
-const TYPE_LABEL = { choice: '객관식', person: '동기 고르기', number: '숫자', short: '주관식', long: '메시지' };
+const TYPE_LABEL = { choice: '객관식', person: '동기 고르기', pair: '커플 고르기', number: '숫자', short: '주관식', long: '메시지' };
 const MEDALS = ['🥇', '🥈', '🥉'];
 
 function esc(s) {
@@ -80,6 +80,7 @@ function renderResults(r, mode) {
       if (r.ranked) return head + barsHTML(r.items, { limit: phone ? 5 : 12, medals: true });
       return head + barsHTML(r.items, { limit: phone ? 10 : 99 });
     case 'person':
+    case 'pair':
       return head + barsHTML(r.items, { limit: phone ? 5 : 12, medals: true });
     case 'number':
       return head + `<div class="stats">

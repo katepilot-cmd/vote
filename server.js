@@ -15,7 +15,7 @@ const F_D = path.join(ROOT, 'data.json');
 
 const TYPE_MAP = {
   '객관식': 'choice', '동기': 'person', '사람': 'person', '숫자': 'number',
-  '단답': 'short', '주관식': 'short', '메시지': 'long', '서술': 'long',
+  '단답': 'short', '주관식': 'short', '메시지': 'long', '서술': 'long', '커플': 'pair', '남녀': 'pair',
 };
 
 function readText(f, def = '') { try { return fs.readFileSync(f, 'utf8'); } catch { return def; } }
@@ -60,19 +60,31 @@ function parseQuestions(text) {
   return out;
 }
 
+// 명단: [남] / [여] 줄 아래에 이름을 적으면 성별을 나눠서 기억 (커플 질문용)
 function parseRoster(text) {
-  const seen = new Set();
+  const all = new Set(), m = new Set(), f = new Set();
+  let sec = null;
   for (const raw of String(text).split(/\r?\n/)) {
     const line = raw.trim();
     if (!line || line.startsWith('#')) continue;
-    for (const n0 of line.split(',')) { const n = n0.trim(); if (n) seen.add(n.slice(0, 20)); }
+    const h = line.match(/^\[?\s*(남|남자|여|여자)\s*\]?\s*:?\s*(.*)$/);
+    let rest = line;
+    if (h && (line.startsWith('[') || /^(남|남자|여|여자)\s*:/.test(line))) { sec = h[1][0]; rest = h[2]; }
+    for (const n0 of rest.split(',')) {
+      const n = n0.trim().slice(0, 20); if (!n) continue;
+      all.add(n); if (sec === '남') m.add(n); if (sec === '여') f.add(n);
+    }
   }
-  return [...seen].sort((a, b) => a.localeCompare(b, 'ko'));
+  const ko = arr => [...arr].sort((a, b) => a.localeCompare(b, 'ko'));
+  const list = ko(all); list.m = ko(m); list.f = ko(f);
+  return list;
 }
 
 // ---------- 상태 ----------
 let questionsText = readText(F_Q);
-let rosterText = process.env.ROSTER || readText(F_R);
+let rosterText = (process.env.ROSTER_M || process.env.ROSTER_F)
+  ? `[남]\n${process.env.ROSTER_M || ''}\n[여]\n${process.env.ROSTER_F || ''}`
+  : (process.env.ROSTER || readText(F_R));
 let Q = parseQuestions(questionsText);
 let R = parseRoster(rosterText);
 
@@ -95,11 +107,14 @@ function save() {
 }
 
 const qKey = i => i + ':' + (Q[i] ? Q[i].title : '');
-const effType = q => (q.type === 'person' && !R.length ? 'short' : q.type);
+const effType = q => ((q.type === 'person' || q.type === 'pair') && !R.length ? 'short' : q.type);
+const pairLists = () => (R.m.length && R.f.length ? [R.m, R.f] : [R, R]);
 function publicQ(i) {
   const q = Q[i]; if (!q) return null;
   const type = effType(q);
-  return { title: q.title, type, options: type === 'choice' ? q.options : type === 'person' ? R : [] };
+  const out = { title: q.title, type, options: type === 'choice' ? q.options : type === 'person' ? R : [] };
+  if (type === 'pair') { const [m, f] = pairLists(); out.left = m; out.right = f; }
+  return out;
 }
 function timeFor(q) {
   if (q.time != null) return q.time;
@@ -125,7 +140,7 @@ function results(i) {
       r.ranked = true;
       r.items = r.items.filter(i => i.count > 0).sort((a, b) => b.count - a.count);
     }
-  } else if (t === 'person') {
+  } else if (t === 'person' || t === 'pair') {
     const c = new Map();
     for (const v of vals) c.set(v, (c.get(v) || 0) + 1);
     r.items = [...c].map(([label, count]) => ({ label, count }))
@@ -334,6 +349,12 @@ function api(p, d) {
     let v = d.value;
     if (t === 'choice') { if (!q.options.includes(v)) throw new Error('보기에서 골라 주세요'); }
     else if (t === 'person') { if (!R.includes(v)) throw new Error('명단에서 골라 주세요'); }
+    else if (t === 'pair') {
+      const [m, f] = pairLists();
+      if (!v || !m.includes(v.m) || !f.includes(v.f)) throw new Error('양쪽에서 한 명씩 골라 주세요');
+      if (v.m === v.f) throw new Error('서로 다른 두 사람을 골라 주세요');
+      v = `${v.m} ♥ ${v.f}`;
+    }
     else if (t === 'number') { v = Number(v); if (!Number.isInteger(v) || v < 0 || v > 999) throw new Error('0~999 사이 숫자를 입력해 주세요'); }
     else {
       v = t === 'short' ? str(v, 30).replace(/\s+/g, ' ').trim() : str(v, 300).trim();
