@@ -1,0 +1,8 @@
+{
+  "name": "jonggang-vote",
+  "version": "1.0.0",
+  "description": "종강파티 실시간 투표 (카훗 스타일)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}

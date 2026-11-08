@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: jonggang-vote
+    runtime: node
+    plan: free
+    buildCommand: "true"
+    startCommand: node server.js
+    envVars:
+      - key: HOST_KEY
+        sync: false

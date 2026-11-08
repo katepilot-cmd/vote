@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3b1a7a">
+<title>종강파티 투표</title>
+<link rel="stylesheet" href="/style.css">
+<style>
+  body { font-size: 17px; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 16px 16px 40px; }
+  .top { display: flex; justify-content: space-between; align-items: center; font-weight: 700; opacity: .9; margin-bottom: 10px; }
+  .qnum { background: #fff; color: #3b1a7a; padding: 2px 10px; border-radius: 99px; font-weight: 900; }
+  h1 { font-size: 1.5em; line-height: 1.3; margin: .3em 0 .6em; word-break: keep-all; }
+  .center { text-align: center; padding-top: 14vh; }
+  .center .big { font-size: 3.5em; }
+  .panel { background: rgba(255,255,255,.12); border-radius: 18px; padding: 18px; }
+  .field { width: 100%; font-size: 1.2em; padding: 14px; border-radius: 12px; border: 0; color: #222; }
+  textarea.field { resize: vertical; min-height: 8em; line-height: 1.5; }
+  .full { width: 100%; margin-top: 12px; font-size: 1.15em; padding: 14px; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .choices.one { grid-template-columns: 1fr; }
+  .choices button { min-height: 72px; border-radius: 14px; color: #fff; font-weight: 800; font-size: 1.1em; padding: 10px; box-shadow: 0 4px 0 rgba(0,0,0,.25); word-break: keep-all; }
+  .choices button:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.25); }
+  .search { position: sticky; top: 0; padding: 8px 0; background: transparent; z-index: 2; }
+  .names { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .names button { background: #fff; color: #3b1a7a; font-weight: 800; padding: 14px 4px; border-radius: 12px; font-size: 1.05em; box-shadow: 0 3px 0 rgba(0,0,0,.2); }
+  .names button.mine { background: #26890c; color: #fff; }
+  .num { display: flex; align-items: center; gap: 10px; justify-content: center; }
+  .num button { width: 64px; height: 64px; border-radius: 50%; font-size: 2em; font-weight: 900; background: #fff; color: #3b1a7a; }
+  .num input { width: 120px; text-align: center; font-size: 2.4em; font-weight: 900; }
+  .counter { text-align: right; opacity: .75; font-size: .9em; margin-top: 4px; }
+  .timer { font-weight: 900; }
+  .timer.warn { color: #ffcdd2; }
+  .done .check { font-size: 4em; }
+  .myans { background: #fff; color: #3b1a7a; display: inline-block; padding: 8px 16px; border-radius: 12px; font-weight: 800; margin: 10px 0; max-width: 100%; white-space: pre-wrap; word-break: break-word; }
+  .results { background: rgba(0,0,0,.18); border-radius: 16px; padding: 14px; font-size: .95em; }
+  .bar-row { grid-template-columns: minmax(4em, 32%) 1fr 2em; }
+  .cols { height: 10em; }
+  .stats b { font-size: 1.4em; }
+  .me { opacity: .75; }
+  .anon { font-size: .85em; opacity: .8; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div id="conn">연결이 끊겼어요. 다시 연결하는 중…</div>
+<div class="wrap" id="app"><div class="center">불러오는 중…</div></div>
+<script src="/common.js"></script>
+<script>
+const rnd = () => (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
+let cid = localStorage.getItem('cid'); if (!cid) { cid = rnd(); localStorage.setItem('cid', cid); }
+let S = null, offset = 0, viewKey = '', editing = false, rejoining = false;
+
+function toast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+async function post(url, body) {
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cid, ...body }) });
+  const j = await r.json(); if (j.error) { toast(j.error); throw new Error(j.error); } return j;
+}
+async function join(name) {
+  name = name.trim(); if (!name) return toast('닉네임을 입력해 주세요');
+  localStorage.setItem('name', name);
+  await post('/api/join', { name });
+}
+async function answer(value) {
+  if (navigator.vibrate) navigator.vibrate(30);
+  await post('/api/answer', { value });
+  editing = false;
+}
+
+makeSSE('/events?cid=' + encodeURIComponent(cid), d => {
+  S = d; offset = d.now - Date.now();
+  if (!S.me && localStorage.getItem('name') && !rejoining) {
+    rejoining = true; join(localStorage.getItem('name')).finally(() => (rejoining = false));
+  }
+  render();
+});
+
+function render() {
+  const answered = S.myAnswer !== null;
+  if (S.phase !== 'open') editing = false;
+  const k = !S.me ? (localStorage.getItem('name') ? 'wait-join' : 'join')
+    : [S.phase, S.cur, S.q && S.q.title, S.phase === 'open' ? (answered && !editing ? 'done:' + JSON.stringify(S.myAnswer) : 'ask') : '', S.phase === 'results' ? JSON.stringify(S.results) : ''].join('|');
+  if (k !== viewKey) { viewKey = k; build(); }
+  tick();
+}
+
+function topBar() {
+  return `<div class="top"><span class="qnum">Q${S.cur + 1} / ${S.total}</span><span class="timer" id="timer"></span></div>`;
+}
+
+function build() {
+  const app = document.getElementById('app');
+  if (!S.me) {
+    if (localStorage.getItem('name')) { app.innerHTML = '<div class="center">입장하는 중…</div>'; return; }
+    app.innerHTML = `<div class="center" style="padding-top:10vh"><div class="big">🎉</div><h1>종강파티 투표</h1>
+      <div class="panel"><input class="field" id="nm" maxlength="20" placeholder="닉네임 (아무거나 OK)" autocomplete="off">
+      <button class="btn primary full" id="go">입장하기</button>
+      <div class="anon">🤫 닉네임은 참여 인원 표시에만 쓰이고, 답은 모두 익명으로 집계돼요.</div></div></div>`;
+    const go = () => join(document.getElementById('nm').value);
+    document.getElementById('go').onclick = go;
+    document.getElementById('nm').onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) go(); };
+    return;
+  }
+  const q = S.q;
+  if (S.phase === 'lobby') {
+    app.innerHTML = `<div class="center"><div class="big">⏳</div><h1>곧 시작해요!</h1><p class="me">${esc(S.me)} 님 입장 완료</p><p>큰 화면을 봐 주세요 👀</p></div>`;
+  } else if (S.phase === 'end') {
+    app.innerHTML = `<div class="center"><div class="big">🎊</div><h1>수고하셨습니다!</h1><p>즐거운 방학 보내세요 ☀️</p></div>`;
+  } else if (S.phase === 'results') {
+    app.innerHTML = `<div class="top"><span class="qnum">Q${S.cur + 1} / ${S.total}</span><span>결과 공개!</span></div>
+      <h1>${esc(q.title)}</h1><div class="results">${renderResults(S.results, 'phone')}</div>
+      <p style="text-align:center;opacity:.85">자세한 결과는 큰 화면에서 👀</p>`;
+  } else if (S.myAnswer !== null && !editing) {
+    const shown = q.type === 'number' ? S.myAnswer : S.myAnswer;
+    app.innerHTML = `${topBar()}<h1>${esc(q.title)}</h1><div class="center done" style="padding-top:4vh"><div class="check">✅</div>
+      <h2>제출 완료!</h2><div class="myans">${esc(shown)}</div><p>다른 동기들을 기다리는 중…</p>
+      <button class="btn ghost" id="edit">답 바꾸기</button></div>`;
+    document.getElementById('edit').onclick = () => { editing = true; viewKey = ''; render(); };
+  } else {
+    app.innerHTML = `${topBar()}<h1>${esc(q.title)}</h1><div id="ask"></div>`;
+    buildAsk(document.getElementById('ask'), q);
+  }
+}
+
+function buildAsk(el, q) {
+  const prev = S.myAnswer;
+  if (q.type === 'choice') {
+    const one = q.options.length > 6 || q.options.some(o => o.length > 8);
+    el.innerHTML = `<div class="choices ${one ? 'one' : ''}">${q.options.map((o, i) =>
+      `<button data-v="${esc(o)}" style="background:${COLORS[i % COLORS.length]}">${esc(o)}</button>`).join('')}</div>`;
+    el.querySelectorAll('button').forEach(b => (b.onclick = () => answer(b.dataset.v)));
+  } else if (q.type === 'person') {
+    el.innerHTML = `<div class="search"><input class="field" id="sq" placeholder="🔍 이름 검색" autocomplete="off"></div>
+      <div class="names">${q.options.map(n => `<button data-v="${esc(n)}" class="${n === prev ? 'mine' : ''}">${esc(n)}</button>`).join('')}</div>`;
+    const btns = [...el.querySelectorAll('.names button')];
+    btns.forEach(b => (b.onclick = () => answer(b.dataset.v)));
+    document.getElementById('sq').oninput = e => {
+      const s = e.target.value.replace(/\s/g, '');
+      btns.forEach(b => (b.style.display = !s || b.dataset.v.replace(/\s/g, '').includes(s) ? '' : 'none'));
+    };
+  } else if (q.type === 'number') {
+    el.innerHTML = `<div class="panel"><div class="num"><button id="mn">−</button>
+      <input class="field" id="nv" type="number" inputmode="numeric" min="0" max="999" value="${prev ?? 0}"><button id="pl">+</button></div>
+      <button class="btn primary full" id="sb">제출하기</button></div>`;
+    const nv = document.getElementById('nv');
+    document.getElementById('mn').onclick = () => (nv.value = Math.max(0, (parseInt(nv.value) || 0) - 1));
+    document.getElementById('pl').onclick = () => (nv.value = Math.min(999, (parseInt(nv.value) || 0) + 1));
+    document.getElementById('sb').onclick = () => answer(parseInt(nv.value) || 0);
+  } else {
+    const long = q.type === 'long', max = long ? 300 : 30;
+    el.innerHTML = `<div class="panel">${long
+      ? `<textarea class="field" id="tv" maxlength="${max}" placeholder="여기에 적어 주세요"></textarea>`
+      : `<input class="field" id="tv" maxlength="${max}" placeholder="짧게 적어 주세요" autocomplete="off">`}
+      <div class="counter"><span id="cc">0</span> / ${max}</div>
+      <button class="btn primary full" id="sb">제출하기</button>
+      <div class="anon">🤫 익명으로 공개돼요${long ? '. 큰 화면에 메모지로 나와요' : ''}.</div></div>`;
+    const tv = document.getElementById('tv');
+    if (prev !== null) tv.value = prev;
+    const cc = () => (document.getElementById('cc').textContent = tv.value.length);
+    tv.oninput = cc; cc();
+    document.getElementById('sb').onclick = () => { if (!tv.value.trim()) return toast('답을 입력해 주세요'); answer(tv.value); };
+    if (!long) tv.onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) document.getElementById('sb').click(); };
+  }
+}
+
+function tick() {
+  const el = document.getElementById('timer');
+  if (!el || !S || S.phase !== 'open') return;
+  if (!S.endsAt) { el.textContent = ''; return; }
+  const left = Math.max(0, Math.ceil((S.endsAt - (Date.now() + offset)) / 1000));
+  el.textContent = `⏱ ${left}초`; el.className = 'timer' + (left <= 5 ? ' warn' : '');
+}
+setInterval(tick, 250);
+</script>
+</body>
+</html>

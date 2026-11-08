@@ -1,0 +1,53 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  background: linear-gradient(160deg, #3b1a7a 0%, #5b2aa8 55%, #7c3fc4 100%) fixed;
+  color: #fff; -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; cursor: pointer; border: 0; }
+input, textarea { font: inherit; }
+.btn { padding: .7em 1.2em; border-radius: 12px; background: #fff; color: #3b1a7a; font-weight: 800; box-shadow: 0 4px 0 rgba(0,0,0,.25); transition: transform .08s; }
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.25); }
+.btn.primary { background: #26890c; color: #fff; }
+.btn.danger { background: #e21b3c; color: #fff; }
+.btn.ghost { background: rgba(255,255,255,.15); color: #fff; box-shadow: none; }
+.btn.big { font-size: 1.4rem; padding: .8em 1.8em; }
+.btn:disabled { opacity: .5; }
+
+#conn { position: fixed; top: 0; left: 0; right: 0; background: #e21b3c; color: #fff; text-align: center; padding: 6px; font-weight: 700; transform: translateY(-100%); transition: transform .3s; z-index: 99; }
+#conn.show { transform: none; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #222; color: #fff; padding: 12px 18px; border-radius: 12px; font-weight: 700; z-index: 100; animation: pop .25s; max-width: 90vw; }
+
+/* ---------- 결과 ---------- */
+.res-total { opacity: .85; margin-bottom: .8em; font-size: 1.05em; }
+.empty { padding: 2em 1em; text-align: center; font-size: 1.3em; opacity: .9; }
+.bars { display: flex; flex-direction: column; gap: .5em; }
+.bar-row { display: grid; grid-template-columns: minmax(5em, 28%) 1fr 2.6em; align-items: center; gap: .7em; opacity: 0; animation: fadein .4s var(--d) forwards; }
+.bar-row.top .bar-label { font-weight: 900; }
+.bar-label { font-weight: 700; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.medal { margin-right: .25em; }
+.bar-track { background: rgba(255,255,255,.12); border-radius: 8px; height: 1.8em; overflow: hidden; }
+.bar-fill { height: 100%; width: 0; border-radius: 8px; animation: grow 1.1s cubic-bezier(.2,.8,.2,1) calc(var(--d) + .2s) forwards; }
+.bar-count { font-weight: 900; font-size: 1.2em; }
+.more { text-align: center; opacity: .7; margin-top: .3em; }
+.stats { display: flex; gap: 1em; justify-content: center; margin-bottom: 1em; flex-wrap: wrap; }
+.stats div { background: rgba(255,255,255,.14); border-radius: 14px; padding: .5em 1.2em; text-align: center; min-width: 6em; }
+.stats small { display: block; opacity: .8; }
+.stats b { font-size: 2em; }
+.cols { display: flex; align-items: flex-end; gap: .4em; height: 13em; padding-top: 1.5em; }
+.col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; min-width: 0; }
+.col-bar { width: 100%; max-width: 4em; height: 0; border-radius: 8px 8px 0 0; animation: growh 1.1s cubic-bezier(.2,.8,.2,1) calc(var(--d) + .2s) forwards; }
+.col-count { font-weight: 900; margin-bottom: .2em; }
+.col-label { margin-top: .3em; font-weight: 700; }
+.cloud { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .2em .6em; padding: 1em; background: rgba(255,255,255,.95); border-radius: 18px; line-height: 1.15; }
+.cloud span { font-weight: 900; opacity: 0; animation: pop .5s var(--d) forwards; }
+.split { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.5em; align-items: start; }
+.side-rank h3 { margin: 0 0 .5em; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1em; }
+.card { color: #222; padding: 1em 1.1em; border-radius: 6px; font-size: 1.15em; line-height: 1.45; box-shadow: 0 6px 14px rgba(0,0,0,.25); transform: rotate(var(--rot)); white-space: pre-wrap; word-break: break-word; opacity: 0; animation: pop .45s var(--d) forwards; cursor: zoom-in; min-height: 5em; }
+
+@keyframes grow { to { width: var(--w); } }
+@keyframes growh { to { height: var(--h); } }
+@keyframes fadein { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+@keyframes pop { from { opacity: 0; transform: scale(.6) rotate(var(--rot, 0deg)); } to { opacity: 1; transform: scale(1) rotate(var(--rot, 0deg)); } }
