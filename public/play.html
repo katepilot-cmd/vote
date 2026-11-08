@@ -3,14 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#3b1a7a">
+<meta name="theme-color" content="#0f1a33">
 <title>종강파티 투표</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="/style.css">
 <style>
   body { font-size: 17px; }
   .wrap { max-width: 560px; margin: 0 auto; padding: 16px 16px 40px; }
   .top { display: flex; justify-content: space-between; align-items: center; font-weight: 700; opacity: .9; margin-bottom: 10px; }
-  .qnum { background: #fff; color: #3b1a7a; padding: 2px 10px; border-radius: 99px; font-weight: 900; }
+  .qnum { background: #fff; color: #16213e; padding: 2px 10px; border-radius: 99px; font-weight: 900; }
   h1 { font-size: 1.5em; line-height: 1.3; margin: .3em 0 .6em; word-break: keep-all; }
   .center { text-align: center; padding-top: 14vh; }
   .center .big { font-size: 3.5em; }
@@ -20,20 +21,20 @@
   .full { width: 100%; margin-top: 12px; font-size: 1.15em; padding: 14px; }
   .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .choices.one { grid-template-columns: 1fr; }
-  .choices button { min-height: 72px; border-radius: 14px; color: #fff; font-weight: 800; font-size: 1.1em; padding: 10px; box-shadow: 0 4px 0 rgba(0,0,0,.25); word-break: keep-all; }
+  .choices button { min-height: 72px; border-radius: 14px; color: #16213e; font-weight: 800; font-size: 1.1em; padding: 10px; box-shadow: 0 4px 0 rgba(0,0,0,.25); word-break: keep-all; }
   .choices button:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.25); }
   .search { position: sticky; top: 0; padding: 8px 0; background: transparent; z-index: 2; }
   .names { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .names button { background: #fff; color: #3b1a7a; font-weight: 800; padding: 14px 4px; border-radius: 12px; font-size: 1.05em; box-shadow: 0 3px 0 rgba(0,0,0,.2); }
-  .names button.mine { background: #26890c; color: #fff; }
+  .names button { background: #fff; color: #16213e; font-weight: 800; padding: 14px 4px; border-radius: 12px; font-size: 1.05em; box-shadow: 0 3px 0 rgba(0,0,0,.2); }
+  .names button.mine { background: #ff6b6b; color: #fff; }
   .num { display: flex; align-items: center; gap: 10px; justify-content: center; }
-  .num button { width: 64px; height: 64px; border-radius: 50%; font-size: 2em; font-weight: 900; background: #fff; color: #3b1a7a; }
+  .num button { width: 64px; height: 64px; border-radius: 50%; font-size: 2em; font-weight: 900; background: #fff; color: #16213e; }
   .num input { width: 120px; text-align: center; font-size: 2.4em; font-weight: 900; }
   .counter { text-align: right; opacity: .75; font-size: .9em; margin-top: 4px; }
   .timer { font-weight: 900; }
   .timer.warn { color: #ffcdd2; }
   .done .check { font-size: 4em; }
-  .myans { background: #fff; color: #3b1a7a; display: inline-block; padding: 8px 16px; border-radius: 12px; font-weight: 800; margin: 10px 0; max-width: 100%; white-space: pre-wrap; word-break: break-word; }
+  .myans { background: #fff; color: #16213e; display: inline-block; padding: 8px 16px; border-radius: 12px; font-weight: 800; margin: 10px 0; max-width: 100%; white-space: pre-wrap; word-break: break-word; }
   .results { background: rgba(0,0,0,.18); border-radius: 16px; padding: 14px; font-size: .95em; }
   .bar-row { grid-template-columns: minmax(4em, 32%) 1fr 2em; }
   .cols { height: 10em; }

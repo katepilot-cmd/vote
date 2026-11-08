@@ -1,5 +1,5 @@
 // 진행자 화면과 휴대폰 화면이 함께 쓰는 코드
-const COLORS = ['#e21b3c', '#1368ce', '#d89e00', '#26890c', '#864cbf', '#0aa3a3', '#e5631b', '#c2185b', '#5d7b00', '#3949ab'];
+const COLORS = ['#ff6b6b', '#4cc9f0', '#ffd166', '#06d6a0', '#b388ff', '#ff9f43', '#f78fb3', '#48bfe3', '#a3e635', '#7b8cff'];
 const TYPE_LABEL = { choice: '객관식', person: '동기 고르기', number: '숫자', short: '주관식', long: '메시지' };
 const MEDALS = ['🥇', '🥈', '🥉'];
 
