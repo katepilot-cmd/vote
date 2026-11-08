@@ -53,7 +53,7 @@ function parseRoster(text) {
 
 // ---------- 상태 ----------
 let questionsText = readText(F_Q);
-let rosterText = readText(F_R);
+let rosterText = process.env.ROSTER || readText(F_R);
 let Q = parseQuestions(questionsText);
 let R = parseRoster(rosterText);
 
