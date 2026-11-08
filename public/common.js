@@ -1,5 +1,5 @@
 // 진행자 화면과 휴대폰 화면이 함께 쓰는 코드
-const COLORS = ['#ff6b6b', '#4cc9f0', '#ffd166', '#06d6a0', '#b388ff', '#ff9f43', '#f78fb3', '#48bfe3', '#a3e635', '#7b8cff'];
+const COLORS = ['#ff5a5f', '#52b788', '#ffd166', '#f8f9fa', '#ff8fa3', '#95d5b2', '#f4a261', '#a7c957', '#ffb4a2', '#80ed99'];
 const TYPE_LABEL = { choice: '객관식', person: '동기 고르기', number: '숫자', short: '주관식', long: '메시지' };
 const MEDALS = ['🥇', '🥈', '🥉'];
 
@@ -66,7 +66,7 @@ function cloudHTML(items) {
 
 function cardsHTML(items) {
   return `<div class="cards">${items.map((it, k) => `
-    <div class="card" data-k="${k}" style="--d:${Math.min(k, 30) * 0.07}s;--rot:${((k * 37) % 7) - 3}deg;background:${['#fff59d', '#ffccbc', '#c8e6c9', '#b3e5fc', '#e1bee7', '#ffe0b2'][k % 6]}">${esc(it.label)}</div>`).join('')}</div>`;
+    <div class="card" data-k="${k}" style="--d:${Math.min(k, 30) * 0.07}s;--rot:${((k * 37) % 7) - 3}deg;background:${['#fff3c4', '#ffd6d6', '#d4f1dd', '#ffffff', '#ffe1e1', '#e3f6e9'][k % 6]}">${esc(it.label)}</div>`).join('')}</div>`;
 }
 
 // mode: 'host' | 'phone'
