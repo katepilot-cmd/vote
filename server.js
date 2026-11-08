@@ -25,7 +25,14 @@ function parseQuestions(text) {
   for (const raw of String(text).split(/\r?\n/)) {
     const line = raw.trim();
     if (!line || line.startsWith('#')) continue;
-    const parts = line.split('|').map(s => s.trim());
+    let parts = line.split('|').map(s => s.trim());
+    // '| 5분', '| 90초' 처럼 적으면 그 질문만 제한시간 따로
+    let time = null;
+    parts = parts.filter((p, idx) => {
+      const m = idx > 1 && p.match(/^(\d+)\s*(초|분)$/);
+      if (m) { time = Number(m[1]) * (m[2] === '분' ? 60 : 1); return false; }
+      return true;
+    });
     let type = TYPE_MAP[parts[0]];
     let title, options = [];
     if (!type) { type = 'short'; title = line; }
@@ -36,7 +43,7 @@ function parseQuestions(text) {
     }
     if (!title) continue;
     if (type === 'choice' && options.length < 2) type = 'short';
-    out.push({ type, title, options });
+    out.push({ type, title, options, time });
   }
   return out;
 }
@@ -58,10 +65,10 @@ let Q = parseQuestions(questionsText);
 let R = parseRoster(rosterText);
 
 const D = {
-  hostKey: '', settings: { timeChoice: 0, timeText: 0, autoClose: false },
+  hostKey: '', settings: { timeChoice: 120, timeText: 120, autoClose: false },
   cur: -1, phase: 'lobby', endsAt: 0, answers: {}, players: {},
 };
-try { const saved = JSON.parse(readText(F_D, '{}')); Object.assign(D, saved); D.settings = { timeChoice: 0, timeText: 0, autoClose: false, ...(saved.settings || {}) }; } catch {}
+try { const saved = JSON.parse(readText(F_D, '{}')); Object.assign(D, saved); D.settings = { timeChoice: 120, timeText: 120, autoClose: false, ...(saved.settings || {}) }; } catch {}
 if (process.env.HOST_KEY) D.hostKey = process.env.HOST_KEY;
 if (!D.hostKey) D.hostKey = String(crypto.randomInt(1000, 9999));
 if (D.phase === 'open') D.phase = 'results';
@@ -83,6 +90,7 @@ function publicQ(i) {
   return { title: q.title, type, options: type === 'choice' ? q.options : type === 'person' ? R : [] };
 }
 function timeFor(q) {
+  if (q.time != null) return q.time;
   const t = effType(q);
   return (t === 'short' || t === 'long') ? D.settings.timeText : D.settings.timeChoice;
 }
