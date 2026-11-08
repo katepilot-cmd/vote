@@ -77,6 +77,7 @@ function renderResults(r, mode) {
   const head = `<div class="res-total">총 <b>${r.total}</b>명 응답</div>`;
   switch (r.type) {
     case 'choice':
+      if (r.ranked) return head + barsHTML(r.items, { limit: phone ? 5 : 12, medals: true });
       return head + barsHTML(r.items, { limit: phone ? 10 : 99 });
     case 'person':
       return head + barsHTML(r.items, { limit: phone ? 5 : 12, medals: true });

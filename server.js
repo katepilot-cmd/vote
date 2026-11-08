@@ -20,6 +20,18 @@ const TYPE_MAP = {
 
 function readText(f, def = '') { try { return fs.readFileSync(f, 'utf8'); } catch { return def; } }
 
+// 쉼표로 나누되 괄호 안의 쉼표는 무시: "감면(감염, 류마, 알레)" 는 보기 하나
+function splitOptions(str) {
+  const out = []; let cur = '', depth = 0;
+  for (const ch of str) {
+    if ('(（['.includes(ch)) depth++;
+    if (')）]'.includes(ch)) depth = Math.max(0, depth - 1);
+    if (ch === ',' && depth === 0) { out.push(cur); cur = ''; } else cur += ch;
+  }
+  out.push(cur);
+  return out.map(s => s.trim()).filter(Boolean);
+}
+
 function parseQuestions(text) {
   const out = [];
   for (const raw of String(text).split(/\r?\n/)) {
@@ -38,7 +50,7 @@ function parseQuestions(text) {
     if (!type) { type = 'short'; title = line; }
     else {
       title = parts[1] || '';
-      if (parts.length > 2) options = parts.slice(2).join(',').split(',').map(s => s.trim()).filter(Boolean);
+      if (parts.length > 2) options = splitOptions(parts.slice(2).join(','));
       options = [...new Set(options)];
     }
     if (!title) continue;
@@ -109,6 +121,10 @@ function results(i) {
     const c = new Map(q.options.map(o => [o, 0]));
     for (const v of vals) if (c.has(v)) c.set(v, c.get(v) + 1);
     r.items = [...c].map(([label, count]) => ({ label, count }));
+    if (q.options.length > 8) { // 보기가 많으면 순위로
+      r.ranked = true;
+      r.items = r.items.filter(i => i.count > 0).sort((a, b) => b.count - a.count);
+    }
   } else if (t === 'person') {
     const c = new Map();
     for (const v of vals) c.set(v, (c.get(v) || 0) + 1);

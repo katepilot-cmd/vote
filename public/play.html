@@ -26,6 +26,8 @@
   .search { position: sticky; top: 0; padding: 8px 0; background: transparent; z-index: 2; }
   .names { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .names button { background: #fff; color: #0b3d2e; font-weight: 800; padding: 14px 4px; border-radius: 12px; font-size: 1.05em; box-shadow: 0 3px 0 rgba(0,0,0,.2); }
+  .names.many { grid-template-columns: repeat(2, 1fr); }
+  .names.many button { font-size: .95em; padding: 12px 6px; word-break: keep-all; }
   .names button.mine { background: #e63946; color: #fff; }
   .num { display: flex; align-items: center; gap: 10px; justify-content: center; }
   .num button { width: 64px; height: 64px; border-radius: 50%; font-size: 2em; font-weight: 900; background: #fff; color: #0b3d2e; }
@@ -128,7 +130,17 @@ function build() {
 
 function buildAsk(el, q) {
   const prev = S.myAnswer;
-  if (q.type === 'choice') {
+  if (q.type === 'choice' && q.options.length > 8) {
+    // 보기가 많으면 검색 + 작은 버튼 그리드
+    el.innerHTML = `<div class="search"><input class="field" id="sq" placeholder="🔍 검색" autocomplete="off"></div>
+      <div class="names many">${q.options.map(n => `<button data-v="${esc(n)}" class="${n === prev ? 'mine' : ''}">${esc(n)}</button>`).join('')}</div>`;
+    const btns = [...el.querySelectorAll('.names button')];
+    btns.forEach(b => (b.onclick = () => answer(b.dataset.v)));
+    document.getElementById('sq').oninput = e => {
+      const s = e.target.value.replace(/\s/g, '');
+      btns.forEach(b => (b.style.display = !s || b.dataset.v.replace(/\s/g, '').includes(s) ? '' : 'none'));
+    };
+  } else if (q.type === 'choice') {
     const one = q.options.length > 6 || q.options.some(o => o.length > 8);
     el.innerHTML = `<div class="choices ${one ? 'one' : ''}">${q.options.map((o, i) =>
       `<button data-v="${esc(o)}" style="background:${COLORS[i % COLORS.length]}">${esc(o)}</button>`).join('')}</div>`;

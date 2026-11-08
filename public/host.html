@@ -29,6 +29,7 @@
   .answered b { display: block; font-size: 4.5rem; line-height: 1; }
   .opts { display: flex; flex-wrap: wrap; gap: .6em; justify-content: center; max-width: 1100px; margin: 0 auto; }
   .opts span { color: #0b3d2e; padding: .6em 1.1em; border-radius: 12px; font-weight: 800; font-size: 1.3em; }
+  .opts.many span { font-size: 1em; padding: .4em .8em; }
   .hint { text-align: center; font-size: 1.4em; opacity: .9; }
   .controls { position: fixed; z-index: 5; left: 0; right: 0; bottom: 0; display: flex; gap: .8em; justify-content: center; padding: 1em; background: linear-gradient(transparent, rgba(0,0,0,.35)); }
   .results { background: rgba(0,0,0,.18); border-radius: 20px; padding: 1.5em 2em; font-size: 1.25em; }
@@ -168,7 +169,7 @@ function buildStage() {
       : `<button class="btn primary big" data-primary onclick="api('end')">끝내기 🎊</button>`;
   } else if (S.phase === 'open') {
     let body = '';
-    if (q.type === 'choice') body = `<div class="opts">${q.options.map((o, i) => `<span style="background:${COLORS[i % COLORS.length]}">${esc(o)}</span>`).join('')}</div>`;
+    if (q.type === 'choice') body = `<div class="opts${q.options.length > 8 ? ' many' : ''}">${q.options.map((o, i) => `<span style="background:${COLORS[i % COLORS.length]}">${esc(o)}</span>`).join('')}</div>`;
     else if (q.type === 'person') body = `<div class="hint">👆 휴대폰에서 동기 이름을 골라 주세요</div>`;
     else if (q.type === 'number') body = `<div class="hint">🔢 숫자로 답해 주세요</div>`;
     else if (q.type === 'short') body = `<div class="hint">✍️ 짧게 적어 주세요 (같은 답끼리 모아서 보여드려요)</div>`;
