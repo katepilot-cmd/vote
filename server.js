@@ -58,10 +58,10 @@ let Q = parseQuestions(questionsText);
 let R = parseRoster(rosterText);
 
 const D = {
-  hostKey: '', settings: { timeChoice: 30, timeText: 60, autoClose: true },
+  hostKey: '', settings: { timeChoice: 0, timeText: 0, autoClose: false },
   cur: -1, phase: 'lobby', endsAt: 0, answers: {}, players: {},
 };
-try { const saved = JSON.parse(readText(F_D, '{}')); Object.assign(D, saved); D.settings = { timeChoice: 30, timeText: 60, autoClose: true, ...(saved.settings || {}) }; } catch {}
+try { const saved = JSON.parse(readText(F_D, '{}')); Object.assign(D, saved); D.settings = { timeChoice: 0, timeText: 0, autoClose: false, ...(saved.settings || {}) }; } catch {}
 if (process.env.HOST_KEY) D.hostKey = process.env.HOST_KEY;
 if (!D.hostKey) D.hostKey = String(crypto.randomInt(1000, 9999));
 if (D.phase === 'open') D.phase = 'results';
