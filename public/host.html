@@ -186,7 +186,7 @@ function buildStage() {
       ${n >= 0 ? `<button class="btn primary big" data-primary onclick="api('start',{i:${n}})">다음 질문 ▶</button>`
                : `<button class="btn primary big" data-primary onclick="api('end')">끝내기 🎊</button>`}`;
   } else {
-    st.innerHTML = `<div class="endscreen"><h1>🎊 수고하셨습니다! 🎊</h1><p style="font-size:1.6em">모두 즐거운 방학 보내세요 ☀️</p></div>`;
+    st.innerHTML = `<div class="endscreen"><h1>🎊 수고하셨습니다! 🎊</h1><p style="font-size:1.6em">모두 즐거운 의학연구 보내세요 🔬</p></div>`;
     ctl.innerHTML = `<button class="btn ghost" onclick="api('lobby')">대기 화면으로</button>`;
   }
 }

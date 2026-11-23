@@ -118,7 +118,7 @@ function build() {
   if (S.phase === 'lobby') {
     app.innerHTML = `<div class="center"><div class="big">⏳</div><h1>곧 시작해요!</h1><p class="me">${esc(S.me)} 님 입장 완료</p><p>큰 화면을 봐 주세요 👀</p></div>`;
   } else if (S.phase === 'end') {
-    app.innerHTML = `<div class="center"><div class="big">🎊</div><h1>수고하셨습니다!</h1><p>즐거운 방학 보내세요 ☀️</p></div>`;
+    app.innerHTML = `<div class="center"><div class="big">🎊</div><h1>수고하셨습니다!</h1><p>즐거운 의학연구 보내세요 🔬</p></div>`;
   } else if (S.phase === 'results') {
     app.innerHTML = `<div class="top"><span class="qnum">Q${S.cur + 1} / ${S.total}</span><span>결과 공개!</span></div>
       <h1>${esc(q.title)}</h1><div class="results">${renderResults(S.results, 'phone')}</div>
