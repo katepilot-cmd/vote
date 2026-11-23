@@ -39,8 +39,9 @@ function parseQuestions(text) {
     if (!line || line.startsWith('#')) continue;
     let parts = line.split('|').map(s => s.trim());
     // '| 5분', '| 90초' 처럼 적으면 그 질문만 제한시간 따로
-    let time = null;
+    let time = null, seating = false;
     parts = parts.filter((p, idx) => {
+      if (idx > 1 && /^(자리공개|좌석공개)$/.test(p)) { seating = true; return false; }
       const m = idx > 1 && p.match(/^(\d+)\s*(초|분)$/);
       if (m) { time = Number(m[1]) * (m[2] === '분' ? 60 : 1); return false; }
       return true;
@@ -55,7 +56,7 @@ function parseQuestions(text) {
     }
     if (!title) continue;
     if (type === 'choice' && options.length < 2) type = 'short';
-    out.push({ type, title, options, time });
+    out.push({ type, title, options, time, seating });
   }
   return out;
 }
@@ -87,6 +88,20 @@ let rosterText = (process.env.ROSTER_M || process.env.ROSTER_F)
   : (process.env.ROSTER || readText(F_R));
 let Q = parseQuestions(questionsText);
 let R = parseRoster(rosterText);
+
+// 자리 배치: "1테이블: 가, 나 / 2테이블: 다, 라" (줄바꿈, '/', ';' 로 구분). 공개 저장소에 안 올리려고 환경변수 SEATING 또는 seating.txt 에서 읽어요.
+function parseSeating(text) {
+  const out = [];
+  for (const raw of String(text).split(/[\r\n\/;]+/)) {
+    const line = raw.trim(); if (!line || line.startsWith('#')) continue;
+    const m = line.match(/^(.+?)\s*:\s*(.*)$/);
+    if (!m) continue;
+    const names = m[2].split(',').map(x => x.trim()).filter(Boolean);
+    if (names.length) out.push({ table: m[1].trim(), names });
+  }
+  return out;
+}
+const SEATING = parseSeating(process.env.SEATING || readText(path.join(ROOT, 'seating.txt')));
 
 const D = {
   hostKey: '', settings: { timeChoice: 120, timeText: 120, autoClose: false },
@@ -139,6 +154,10 @@ function results(i) {
     if (q.options.length > 8) { // 보기가 많으면 순위로
       r.ranked = true;
       r.items = r.items.filter(i => i.count > 0).sort((a, b) => b.count - a.count);
+    }
+    // 첫 번째 보기(O)가 두 번째(X)보다 많을 때만 자리 배치 공개
+    if (q.seating && SEATING.length && r.items.length >= 2) {
+      if (r.items[0].count > r.items[1].count) r.seating = SEATING; else r.stay = true;
     }
   } else if (t === 'person' || t === 'pair') {
     const c = new Map();
@@ -405,7 +424,7 @@ server.listen(PORT, () => {
   console.log(`  ▶ 진행자 화면 (이 컴퓨터에서 열기):  http://localhost:${PORT}/host?key=${D.hostKey}`);
   console.log(`  ▶ 호스트 비밀번호:  ${D.hostKey}`);
   if (lan.length) console.log(`  ▶ 같은 와이파이의 휴대폰 참여 주소:  ${lan.join('  또는  ')}`);
-  console.log(`\n  질문 ${Q.length}개, 동기 명단 ${R.length}명 불러옴`);
+  console.log(`\n  질문 ${Q.length}개, 동기 명단 ${R.length}명, 자리 배치 ${SEATING.length}테이블 불러옴`);
   console.log('  끄려면 이 창에서 Ctrl + C\n');
   if (process.argv.includes('--open')) {
     const url = `http://localhost:${PORT}/host?key=${D.hostKey}`;

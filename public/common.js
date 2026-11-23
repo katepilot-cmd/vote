@@ -69,6 +69,12 @@ function cardsHTML(items) {
     <div class="card" data-k="${k}" style="--d:${Math.min(k, 30) * 0.07}s;--rot:${((k * 37) % 7) - 3}deg;background:${['#fff3c4', '#ffd6d6', '#d4f1dd', '#ffffff', '#ffe1e1', '#e3f6e9'][k % 6]}">${esc(it.label)}</div>`).join('')}</div>`;
 }
 
+function seatingHTML(r, phone) {
+  if (r.stay) return `<div class="seat-title">😆 자리 그대로 갑니다!</div>`;
+  return `<div class="seat-title">🎄 새 자리 배치 공개! 🎄</div><div class="seats${phone ? ' phone' : ''}">${r.seating.map((t, k) => `
+    <div class="seat" style="--d:${1.2 + k * 0.25}s"><div class="seat-no">${esc(t.table)}</div><div class="seat-names">${t.names.map(n => `<span>${esc(n)}</span>`).join('')}</div></div>`).join('')}</div>`;
+}
+
 // mode: 'host' | 'phone'
 function renderResults(r, mode) {
   if (!r) return '';
@@ -77,6 +83,7 @@ function renderResults(r, mode) {
   const head = `<div class="res-total">총 <b>${r.total}</b>명 응답</div>`;
   switch (r.type) {
     case 'choice':
+      if (r.seating || r.stay) return head + barsHTML(r.items, { limit: 10 }) + seatingHTML(r, phone);
       if (r.ranked) return head + barsHTML(r.items, { limit: phone ? 5 : 12, medals: true });
       return head + barsHTML(r.items, { limit: phone ? 10 : 99 });
     case 'person':
