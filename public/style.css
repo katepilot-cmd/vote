@@ -78,8 +78,10 @@ body::after {
 
 /* 자리 배치 공개 */
 .seat-title { text-align: center; font-size: 1.4em; font-weight: 900; margin: .6em 0 .5em; color: #ffd166; opacity: 0; animation: pop .5s 1s forwards; }
-.seats { display: grid; grid-template-columns: repeat(5, 1fr); gap: .7em; }
-.seats.phone { grid-template-columns: repeat(2, 1fr); }
+.seats { display: grid; grid-template-columns: repeat(var(--cols, 5), 1fr); gap: .7em; }
+.seats.phone { grid-template-columns: repeat(2, 1fr) !important; }
+.seats[style*="--cols:3"]:not(.phone) .seat-names, .seats[style*="--cols:2"]:not(.phone) .seat-names { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 .9em; }
+.seats[style*="--cols:3"]:not(.phone) .seat { font-size: 1em; }
 .seat { background: #fff; color: #0b3d2e; border-radius: 14px; padding: .45em .5em; text-align: center; font-weight: 800; line-height: 1.35; font-size: .9em; border-top: 6px solid #e63946; opacity: 0; animation: pop .45s var(--d) forwards; }
 .seat:nth-child(even) { border-top-color: #2d9d5f; }
 .seat-no { color: #c1121f; font-weight: 900; margin-bottom: .2em; }

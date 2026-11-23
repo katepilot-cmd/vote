@@ -69,9 +69,16 @@ function cardsHTML(items) {
     <div class="card" data-k="${k}" style="--d:${Math.min(k, 30) * 0.07}s;--rot:${((k * 37) % 7) - 3}deg;background:${['#fff3c4', '#ffd6d6', '#d4f1dd', '#ffffff', '#ffe1e1', '#e3f6e9'][k % 6]}">${esc(it.label)}</div>`).join('')}</div>`;
 }
 
+// 테이블 수에 맞춰 줄을 고르게: 6개 → 3·3, 8개 → 4·4, 9개 → 3·3·3, 10개 → 5·5
+function seatCols(n) {
+  if (n <= 4) return n;
+  if (n === 5 || n === 6 || n === 9) return 3;
+  if (n <= 8) return 4;
+  return 5;
+}
 function seatingHTML(r, phone) {
   if (r.stay) return `<div class="seat-title">😆 자리 그대로 갑니다!</div>`;
-  return `<div class="seat-title">🎄 새 자리 배치 공개! 🎄</div><div class="seats${phone ? ' phone' : ''}">${r.seating.map((t, k) => `
+  return `<div class="seat-title">🎄 새 자리 배치 공개! 🎄</div><div class="seats${phone ? ' phone' : ''}" style="--cols:${seatCols(r.seating.length)}">${r.seating.map((t, k) => `
     <div class="seat" style="--d:${1.2 + k * 0.25}s"><div class="seat-no">${esc(t.table)}</div><div class="seat-names">${t.names.map(n => `<span>${esc(n)}</span>`).join('')}</div></div>`).join('')}</div>`;
 }
 
