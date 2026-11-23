@@ -76,10 +76,16 @@ function seatCols(n) {
   if (n <= 8) return 4;
   return 5;
 }
+// 실제 테이블처럼: 위쪽 줄 / 테이블 / 아래쪽 줄로 반씩 나눠 앉히기
+function seatTableHTML(names) {
+  const top = names.slice(0, Math.ceil(names.length / 2)), bottom = names.slice(Math.ceil(names.length / 2));
+  const row = arr => `<div class="seat-side">${arr.map(n => `<span>${esc(n)}</span>`).join('')}</div>`;
+  return `${row(top)}<div class="seat-table"></div>${row(bottom)}`;
+}
 function seatingHTML(r, phone) {
   if (r.stay) return `<div class="seat-title">😆 자리 그대로 갑니다!</div>`;
   return `<div class="seat-title">🎄 새 자리 배치 공개! 🎄</div><div class="seats${phone ? ' phone' : ''}" style="--cols:${seatCols(r.seating.length)}">${r.seating.map((t, k) => `
-    <div class="seat" style="--d:${1.2 + k * 0.25}s"><div class="seat-no">${esc(t.table)}</div><div class="seat-names">${t.names.map(n => `<span>${esc(n)}</span>`).join('')}</div></div>`).join('')}</div>`;
+    <div class="seat" style="--d:${1.2 + k * 0.25}s"><div class="seat-no">${esc(t.table)}</div>${seatTableHTML(t.names)}</div>`).join('')}</div>`;
 }
 
 // mode: 'host' | 'phone'
