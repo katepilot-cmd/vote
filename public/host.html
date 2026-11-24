@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>종강파티 투표 · 진행자</title>
+<title>22학번 종강파티 · 진행자</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="/style.css">
 <script src="/qrcode.js"></script>
@@ -158,7 +158,7 @@ function buildStage() {
   const head = q ? `<div class="qhead"><span class="qnum">Q${S.cur + 1}</span><span class="qtype">${TYPE_LABEL[q.type]}</span></div>` : '';
   if (S.phase === 'lobby') {
     const url = joinUrl();
-    st.innerHTML = `<div class="lobby"><h1>🎄 종강파티 투표 🎅</h1>
+    st.innerHTML = `<div class="lobby"><h1>🎄 22학번 종강파티 🎅</h1>
       <div class="join-box"><div id="bigqr"></div><div><div style="font-size:1.3em">휴대폰 카메라로 QR을 찍거나<br>이 주소로 들어오세요</div>
       <div class="join-url">${esc(url.replace(/^https?:\/\//, ''))}</div>
       <div class="count"><b id="onlineN">${S.online}</b>명 참여 중</div></div></div>
